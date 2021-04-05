@@ -1,0 +1,16 @@
+{
+  "metric": {
+    "precipitation": "mm",
+    "pressure": "mb",
+    "temp": "C",
+    "wind": "km/h",
+    "visibility": "km"
+  },
+  "imperial": {
+    "precipitation": "in",
+    "pressure": "inHg",
+    "temp": "F",
+    "wind": "mph",
+    "visibility": "mi"
+  }
+}

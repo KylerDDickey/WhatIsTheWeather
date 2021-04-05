@@ -1,0 +1,387 @@
+﻿@page "/"
+@inject HttpClient Http
+
+<!-- Forecast Data Component (Output) -->
+@if (forecast != null)
+{
+    <div class="row text-center">
+        <div class="col-sm">
+            @if (inputs.CountryCode == "US" && !string.IsNullOrEmpty(inputs.StateCode) && !acquired_by_zip)
+            {
+                <h1>The weather in @forecast.name, @inputs.StateCode, @forecast.sys.country</h1>
+            }
+            else
+            {
+                <h1>The weather in @forecast.name, @forecast.sys.country</h1>
+            }
+        </div>
+    </div>
+
+    <div class="row align-items-center text-center">
+        <div class="col-sm">
+            <img src="@weather_icon_url" />
+        </div>
+        <div class="col-sm">
+            <h2>@forecast.WeatherPrimary().main</h2>
+            <h2>@Math.Round(forecast.main["temp"]) °@units[units_in_use]["temp"]</h2>
+        </div>
+    </div>
+
+    <div class="row align-items-center text-center">
+        <div class="col-sm">
+            <h4>@Math.Round(forecast.main["temp_max"]) / @Math.Round(@forecast.main["temp_min"]) °@units[units_in_use]["temp"]</h4>
+        </div>
+    </div>
+
+    <div class="row align-items-center text-center">
+        <div class="col-sm">
+            <h4>Feels like @Math.Round(forecast.main["feels_like"]) °@units[units_in_use]["temp"]</h4>
+        </div>
+    </div>
+
+    <div class="row align-items-center text-left">
+        <div class="col-sm mt-4">
+            <h4>Conditions</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="text-left">Wind</th>
+                        @if (forecast.wind.ContainsKey("gust"))
+                        {
+                            <td class="text-right">
+                                @forecast.WindCardinalDirection() @Math.Round(forecast.wind["speed"] * unit_conversions[units_in_use]["wind"]) @units[units_in_use]["wind"] w/
+                                @Math.Round(forecast.wind["speed"] * unit_conversions[units_in_use]["wind"]) @units[units_in_use]["wind"] gusts
+                            </td>
+                        }
+                        else
+                        {
+                            <td class="text-right">
+                                @forecast.WindCardinalDirection() @Math.Round(forecast.wind["speed"] * unit_conversions[units_in_use]["wind"]) @units[units_in_use]["wind"]
+                            </td>
+                        }
+                    </tr>
+                    <tr>
+                        <th class="text-left">Visibility</th>
+                        <td class="text-right">@Math.Round(forecast.visibility * unit_conversions[units_in_use]["visibility"], 2) @units[units_in_use]["visibility"]</td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">Pressure</th>
+                        <td class="text-right">@Math.Round(forecast.main["pressure"] * unit_conversions[units_in_use]["pressure"], units_in_use == "metric" ? 0 : 2) @units[units_in_use]["pressure"]</td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">Humidity</th>
+                        <td class="text-right">@forecast.main["humidity"]%</td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">Cloud cover</th>
+                        <td class="text-right">@forecast.clouds["all"]%</td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">Sunrise</th>
+                        <td class="text-right">@forecast.GetSunrise().ToShortTimeString()</td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">Sunset</th>
+                        <td class="text-right">@forecast.GetSunset().ToShortTimeString()</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    @if (forecast.rain != null && (forecast.rain.ContainsKey("1h") || forecast.rain.ContainsKey("3h")))
+    {
+        <div class="row align-items-center text-left">
+            <div class="col-sm mt-4">
+                <h4>Rain</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table">
+                    <tbody>
+                        @if (forecast.rain.ContainsKey("1h"))
+                        {
+                            <tr>
+                                <th class="text-left">Past hour</th>
+                                <td class="text-right">@Math.Round(forecast.rain["1h"] * unit_conversions[units_in_use]["precipitation"]) @units[units_in_use]["precipitation"]</td>
+                            </tr>
+                        }
+
+                        @if (forecast.rain.ContainsKey("3h"))
+                        {
+                            <tr>
+                                <th class="text-left">Past three hours</th>
+                                <td class="text-right">@Math.Round(forecast.rain["3h"] * unit_conversions[units_in_use]["precipitation"]) @units[units_in_use]["precipitation"]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    @if (forecast.snow != null && (forecast.snow.ContainsKey("1h") || forecast.snow.ContainsKey("3h")))
+    {
+        <div class="row align-items-center text-left">
+            <div class="col-sm mt-4">
+                <h4>Snow</h4>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12">
+                <table class="table">
+                    <tbody>
+                        @if (forecast.snow.ContainsKey("1h"))
+                        {
+                            <tr>
+                                <th class="text-left">Past hour</th>
+                                <td class="text-right">@Math.Round(forecast.snow["1h"] * unit_conversions[units_in_use]["precipitation"]) @units[units_in_use]["precipitation"]</td>
+                            </tr>
+                        }
+
+                        @if (forecast.snow.ContainsKey("3h"))
+                        {
+                            <tr>
+                                <th class="text-left">Past three hours</th>
+                                <td class="text-right">@Math.Round(forecast.snow["3h"] * unit_conversions[units_in_use]["precipitation"]) @units[units_in_use]["precipitation"]</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+
+    <div class="row align-items-center text-left">
+        <div class="col-sm mt-4">
+            <h4>Coordinates</h4>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-12">
+            <table class="table">
+                <tbody>
+                    <tr>
+                        <th class="text-left">Latitude</th>
+                        <td class="text-right">@Math.Round(forecast.coord["lat"], 4)</td>
+                    </tr>
+                    <tr>
+                        <th class="text-left">Longitude</th>
+                        <td class="text-right">@Math.Round(forecast.coord["lon"], 4)</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row align-items-center text-center">
+        <div class="col-sm">
+            <p>Updated at @forecast.GetTime().ToString("f")</p>
+        </div>
+    </div>
+
+    <div class="row align-items-center text-center">
+        <div class="col-sm mb-5">
+            <a href="https://openweathermap.org/current">Source: OpenWeatherMap Current Weather API</a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row text-center">
+        <div class="col-sm">
+            <h1>What is the weather?</h1>
+        </div>
+    </div>
+}
+
+<!-- User Input Form (Output) -->
+@if (loading_complete && !form_load_failure)
+{
+    <div class="row justify-content-center">
+        <EditForm class="col-sm" Model="@inputs" OnValidSubmit="@OnSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="form-group">
+                <InputSelect class="custom-select" @bind-Value="inputs.CountryCode">
+                    <option value="">Select country...</option>
+                    @foreach (Dictionary<string, string> ccode in countries)
+                        {
+                        <option value="@ccode["Code"]">@ccode["Name"]</option>
+                        }
+                </InputSelect>
+            </div>
+
+            @if (inputs.CountryCode == "US")
+            {
+                <div class="form-group">
+                    <InputSelect class="custom-select" @bind-Value="inputs.StateCode">
+                        <option value="">Select state...</option>
+                        @foreach (Dictionary<string, string> state in us_states)
+                                {
+                            <option value="@state["abbreviation"]">@state["name"]</option>
+                                }
+                    </InputSelect>
+                </div>
+            }
+
+            <div class="form-group">
+                <InputText class="form-control" placeholder="City or zip code..." @bind-Value="inputs.CityOrZip" />
+            </div>
+
+            <div class="form-group">
+                <div class="input-group">
+                    <InputSelect class="custom-select" id="unitselect" @bind-Value="inputs.UnitType">
+                        @foreach (string key in units.Keys)
+                            {
+                            <option value="@key">@(char.ToUpper(key[0]) + key.Substring(1))</option>
+                            }
+                    </InputSelect>
+                    <div class="input-group-append">
+                        <button class="btn btn-primary" type="submit">Update</button>
+                    </div>
+                </div>
+            </div>
+        </EditForm>
+    </div>
+}
+else
+{
+    @if (form_load_failure)
+    {
+        <div class="row text-center">
+            <div class="col-sm">
+                <p>Site failed to load...</p>
+            </div>
+        </div>
+    }
+}
+
+@code {
+    // Memory space for user input.
+    private Components.FormData inputs = new Components.FormData();
+
+    // Memory space for openweathermap API app ID.
+    Dictionary<string, string> app_id;
+
+    // Memory space for country code list.
+    private Dictionary<string, string>[] countries;
+
+    // Memory space for US state code list.
+    private Dictionary<string, string>[] us_states;
+
+    // Memory space to tell the page how to calculate temperature and pressure.
+    private Dictionary<string, Dictionary<string, string>> units;
+    private string units_in_use;
+
+    // Memory space containing unit conversion factors.
+    // Used to transform the data into a common format the user is more likely
+    // to be familiar with.
+    private Dictionary<string, Dictionary<string, double>> unit_conversions;
+
+    // Memory space used to catch weather data from API response.
+    private Components.Forecast forecast;
+
+    // Memory space for weather icon URL.
+    private string weather_icon_url;
+
+    // Flag indicating that the API responded with data from a zip code query.
+    private bool acquired_by_zip = true;
+
+    // Flag indicating safety status for rendering the user input form.
+    // The form will not render and the site will not work if dependent files
+    // are not read into memory correctly.
+    private bool form_load_failure = false;
+
+    // Flag indicating that the site has finished loading.
+    private bool loading_complete = false;
+
+    /// <summary>
+    /// Openweathermap current weather API call wrapper.
+    /// </summary>
+    /// <param name="form_field_args">Arguments from the user input form component.</param>
+    /// <param name="app_id">API application id.</param>
+    /// <param name="by_zip">Flag the API to querey by zip code.</param>
+    /// <returns>API call URL</returns>
+    private string owmCall(Components.FormData form_field_args, string app_id, bool by_zip)
+    {
+        string query = (by_zip ? "zip" : "q") + $"={form_field_args.CityOrZip}";
+        if (!by_zip && form_field_args.CountryCode == "US" && !string.IsNullOrEmpty(form_field_args.StateCode))
+        {
+            query += $",{form_field_args.StateCode}";
+        }
+        query += $",{form_field_args.CountryCode}";
+
+        return $"https://api.openweathermap.org/data/2.5/weather?{query}&appid={app_id}&units={form_field_args.UnitType}";
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Attempt to load all dependent information json files.
+        // Flag any errors.
+        try
+        {
+            units = await Http.GetFromJsonAsync<Dictionary<string, Dictionary<string, string>>>("data/units.json");
+            unit_conversions = await Http.GetFromJsonAsync<Dictionary<string, Dictionary<string, double>>>("data/unitconv.json");
+            countries = await Http.GetFromJsonAsync<Dictionary<string, string>[]>("data/a2isocodes.json");
+            us_states = await Http.GetFromJsonAsync<Dictionary<string, string>[]>("data/usstates.json");
+            app_id = await Http.GetFromJsonAsync<Dictionary<string, string>>("data/owmappid.json");
+            form_load_failure = false;
+        }
+        catch (System.Text.Json.JsonException e)
+        {
+            System.Console.WriteLine("Exception during deserialization: {0}", e);
+            form_load_failure = true;
+        }
+        catch (HttpRequestException e)
+        {
+            System.Console.WriteLine("Exception during HTTP access: {0}", e);
+            form_load_failure = true;
+        }
+
+        loading_complete = true;
+    }
+
+    private async Task OnSubmit()
+    {
+        units_in_use = new string(inputs.UnitType);
+
+        // Attempt API calls.
+        try
+        {
+            // Attempt API call by zip code.
+            acquired_by_zip = true;
+            forecast = await Http.GetFromJsonAsync<Components.Forecast>(owmCall(inputs, app_id["id"], acquired_by_zip));
+        }
+        catch (HttpRequestException)
+        {
+            try
+            {
+                // Attempt API call by city (or city and state if selected country is US).
+                acquired_by_zip = false;
+                forecast = await Http.GetFromJsonAsync<Components.Forecast>(owmCall(inputs, app_id["id"], acquired_by_zip));
+            }
+            catch (HttpRequestException e)
+            {
+                System.Console.WriteLine("API calls to OpenWeatherMap failed: {0}", e);
+                forecast = null;
+            }
+        }
+
+        // Get weather icon from openweathermap site.
+        if (forecast != null)
+        {
+            weather_icon_url = $"https://openweathermap.org/img/wn/{forecast.WeatherPrimary().icon}@4x.png";
+        }
+    }
+}
