@@ -217,7 +217,7 @@ else
                     <option value="">Select country...</option>
                     @foreach (Dictionary<string, string> ccode in countries)
                         {
-                        <option value="@ccode["Code"]">@ccode["Name"]</option>
+                        <option value="@ccode["alpha-2"]">@ccode["name"]</option>
                         }
                 </InputSelect>
             </div>
