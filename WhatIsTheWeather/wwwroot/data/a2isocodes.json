@@ -5,7 +5,7 @@
     "country-code": "004"
   },
   {
-    "name": "Åland Islands",
+    "name": "Aland Islands",
     "alpha-2": "AX",
     "country-code": "248"
   },
@@ -270,7 +270,7 @@
     "country-code": "188"
   },
   {
-    "name": "Côte d'Ivoire",
+    "name": "Cote d'Ivoire",
     "alpha-2": "CI",
     "country-code": "384"
   },
@@ -285,7 +285,7 @@
     "country-code": "192"
   },
   {
-    "name": "Curaçao",
+    "name": "Curacao",
     "alpha-2": "CW",
     "country-code": "531"
   },
@@ -905,7 +905,7 @@
     "country-code": "634"
   },
   {
-    "name": "Réunion",
+    "name": "Reunion",
     "alpha-2": "RE",
     "country-code": "638"
   },
@@ -925,7 +925,7 @@
     "country-code": "646"
   },
   {
-    "name": "Saint Barthélemy",
+    "name": "Saint Barthelemy",
     "alpha-2": "BL",
     "country-code": "652"
   },
