@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
-namespace WhatIsTheWeather.Components
+namespace WhatIsTheWeather.Presentation.Models
 {
     /// <summary>
     /// Input form component that stores user's desired query arguments for the OpenWeatherMap Current Weather API.
@@ -12,7 +8,7 @@ namespace WhatIsTheWeather.Components
     public class FormData
     {
         [Required]
-        [StringLength(128, ErrorMessage = "Zipcode too long (128 character limit).")]
+        [StringLength(128, ErrorMessage = "City name or Zip Code too long (128 character limit).")]
         public string CityOrZip { get; set; } // City name or zip code.
 
         [Required]

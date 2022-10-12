@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace WhatIsTheWeather.Components
+namespace WhatIsTheWeather.Presentation.Models
 {
     /// <summary>
     /// Forecast data capable of accepting deserialized json responses from the OpenWeatherMap Current Weather API.

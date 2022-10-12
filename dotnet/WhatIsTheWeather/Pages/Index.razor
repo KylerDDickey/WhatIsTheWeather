@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject HttpClient Http
+@using WhatIsTheWeather.Presentation.Models;
 
 <!-- Forecast Data Component (Output) -->
 @if (forecast != null)
@@ -269,7 +270,7 @@ else
 
 @code {
     // Memory space for user input.
-    private Components.FormData inputs = new Components.FormData();
+    private FormData inputs = new FormData();
 
     // Memory space for openweathermap API app ID.
     Dictionary<string, string> app_id;
@@ -290,7 +291,7 @@ else
     private Dictionary<string, Dictionary<string, double>> unit_conversions;
 
     // Memory space used to catch weather data from API response.
-    private Components.Forecast forecast;
+    private Forecast forecast;
 
     // Memory space for weather icon URL.
     private string weather_icon_url;
@@ -313,7 +314,7 @@ else
     /// <param name="app_id">API application id.</param>
     /// <param name="by_zip">Flag the API to querey by zip code.</param>
     /// <returns>API call URL</returns>
-    private string owmCall(Components.FormData form_field_args, string app_id, bool by_zip)
+    private string owmCall(FormData form_field_args, string app_id, bool by_zip)
     {
         string query = (by_zip ? "zip" : "q") + $"={form_field_args.CityOrZip}";
         if (!by_zip && form_field_args.CountryCode == "US" && !string.IsNullOrEmpty(form_field_args.StateCode))
@@ -361,7 +362,7 @@ else
         {
             // Attempt API call by zip code.
             acquired_by_zip = true;
-            forecast = await Http.GetFromJsonAsync<Components.Forecast>(owmCall(inputs, app_id["id"], acquired_by_zip));
+            forecast = await Http.GetFromJsonAsync<Forecast>(owmCall(inputs, app_id["id"], acquired_by_zip));
         }
         catch (HttpRequestException)
         {
@@ -369,7 +370,7 @@ else
             {
                 // Attempt API call by city (or city and state if selected country is US).
                 acquired_by_zip = false;
-                forecast = await Http.GetFromJsonAsync<Components.Forecast>(owmCall(inputs, app_id["id"], acquired_by_zip));
+                forecast = await Http.GetFromJsonAsync<Forecast>(owmCall(inputs, app_id["id"], acquired_by_zip));
             }
             catch (HttpRequestException e)
             {
